@@ -1,38 +1,59 @@
 # Face Recognition Pipeline (MediaPipe + LBPH)
 
-This project implements a classical face recognition system using computer vision techniques without machine learning models. It combines MediaPipe for face detection with OpenCV's LBPH algorithm for feature recognition.
+A classical face recognition system using computer vision techniques without deep learning. Combines MediaPipe for face detection with OpenCV's LBPH (Local Binary Patterns Histograms) algorithm for recognition.
 
-## Overview
+## Features
 
-The system consists of two core components:
+- ✅ Real-time face detection using MediaPipe Face Mesh
+- ✅ Face recognition using LBPH algorithm (no ML models required)
+- ✅ Interactive menu-driven interface
+- ✅ Multi-person support
+- ✅ Docker containerization for easy deployment
+- ✅ Persistent storage for datasets and trained models
 
-- **MediaPipe Face Mesh** - Face detection and landmark identification
-- **OpenCV LBPH (Local Binary Patterns Histograms)** - Face feature extraction and recognition
+## How It Works
 
-This approach satisfies the "AI Without ML" assignment requirement by using traditional algorithms.
+1. **MediaPipe Face Mesh** - Detects faces and identifies 468 facial landmarks
+2. **LBPH Algorithm** - Extracts texture features and recognizes faces based on local binary patterns
+3. **Training** - Builds a model from captured face images stored in `dataset/`
+4. **Recognition** - Identifies faces in real-time and displays names with confidence scores
 
 ## Project Structure
 
 ```
-project/
-├── main.py              # Main application entry point
+face-recognition/
+├── main.py                 # Main application entry point
 ├── src/
-│   ├── capture.py       # Face image capture module
-│   ├── train.py         # Model training module
-│   ├── predict.py       # Face recognition module
-│   └── utils.py         # Utility functions
-├── tests/               # Test suite
-├── dataset/             # Captured face images (generated)
-├── models/              # Trained models (generated)
-├── requirements.txt     # Python dependencies
-├── Dockerfile           # Docker container definition
-├── docker-compose.yml   # Docker Compose configuration
-└── Makefile            # Build automation
+│   ├── capture.py          # Face image capture module
+│   ├── train.py            # LBPH model training module
+│   ├── predict.py          # Real-time face recognition
+│   └── utils.py            # Utility functions
+├── tests/
+│   └── test_utils.py       # Test suite
+├── dataset/                # Captured face images (auto-generated)
+│   └── <person_name>/      # One folder per person
+│       └── *.jpg           # Face images
+├── models/                 # Trained models (auto-generated)
+│   ├── lbph_model.xml      # Trained LBPH recognizer
+│   └── label_map.json      # Person name to label mapping
+├── requirements.txt        # Python dependencies
+├── setup.sh                # Automated setup script
+├── Dockerfile              # Docker container definition
+├── docker-compose.yml      # Docker Compose configuration
+├── docker-run.sh           # Docker run helper script
+└── Makefile               # Build automation commands
 ```
 
-## Installation
+## Prerequisites
 
-### Quick Setup (Linux/Mac)
+- Python 3.11 or higher
+- Webcam/Camera device
+- Linux/Mac OS (for X11 GUI support)
+- Docker (optional, for containerized deployment)
+
+## Installation & Setup
+
+### Option 1: Quick Setup (Recommended)
 
 Run the automated setup script:
 
@@ -42,89 +63,178 @@ chmod +x setup.sh
 source venv/bin/activate
 ```
 
-### Manual Setup
+This will:
+- Create a virtual environment
+- Install all dependencies
+- Create necessary directories (`dataset/`, `models/`)
 
-1. Create a virtual environment:
+### Option 2: Manual Setup
+
+1. **Create virtual environment:**
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-The `opencv-contrib-python` package is required for LBPH algorithm support.
-
-## Usage
-
-### Running the Application
-
-Start the main application:
+3. **Create directories:**
 
 ```bash
+mkdir -p dataset models
+```
+
+**Note:** The `opencv-contrib-python` package is required for LBPH algorithm support.
+
+## How to Run
+
+### Step 1: Start the Application
+
+Activate your virtual environment and run:
+
+```bash
+source venv/bin/activate  # Skip if already activated
 python main.py
 ```
 
-This launches an interactive menu with the following options:
+You'll see an interactive menu:
 
-1. **Capture Face Images** - Collect face samples for training
-2. **Train Model** - Train the LBPH recognizer on captured data
-3. **Run Face Recognition** - Perform real-time face recognition
-4. **View Dataset Info** - Display statistics about captured data
-5. **Exit** - Close the application
+```
+==============================================================
+  Face Recognition Pipeline
+  MediaPipe + LBPH
+==============================================================
 
-### Workflow
+  Status:
+    Dataset: 0 people, 0 images
+    Model: Not trained
 
-1. **Capture**: Enter a person's name and capture face images (press Q to stop)
-2. **Train**: Train the model on all captured images
-3. **Recognize**: Run real-time face recognition (press Q to stop)
+--------------------------------------------------------------
 
-The system supports multiple people. Repeat the capture-train cycle to add new identities or improve accuracy.
+1. Capture Face Images
+2. Train Model
+3. Run Face Recognition
+4. View Dataset Info
+5. Exit
 
-### Standalone Module Usage
-
-Each module can also be run independently:
-
-```bash
-python -m src.capture   # Capture faces
-python -m src.train     # Train model
-python -m src.predict   # Run recognition
+==============================================================
 ```
 
-## Docker Deployment
+### Step 2: Capture Face Images
 
-### Quick Start with Docker
+1. Select option **1** from the menu
+2. Enter the person's name when prompted
+3. Position your face in front of the camera
+4. The system will automatically capture face images
+5. Press **Q** to stop capturing
 
-Using the automated script:
+**Output:** Images saved to `dataset/<person_name>/`
+
+### Step 3: Train the Model
+
+1. Select option **2** from the menu
+2. The system will load all images from `dataset/`
+3. Training progress will be displayed
+
+**Output:** 
+- `models/lbph_model.xml` - Trained LBPH recognizer
+- `models/label_map.json` - Name-to-label mapping
+
+### Step 4: Run Face Recognition
+
+1. Select option **3** from the menu
+2. Position your face in front of the camera
+3. The system will display:
+   - Green rectangle around detected faces
+   - Person's name
+   - Confidence score (lower is better)
+4. Press **Q** to stop recognition
+
+### Step 5: Add More People (Optional)
+
+To recognize multiple people:
+1. Repeat Step 2 (Capture) for each new person
+2. Run Step 3 (Train) again to update the model
+3. Run Step 4 (Recognize) to test
+
+### View Dataset Information
+
+Select option **4** to see:
+- Total number of people in dataset
+- Total number of images
+- Images per person
+
+## Complete Workflow Example
+
+```bash
+# 1. Setup (one-time)
+./setup.sh
+source venv/bin/activate
+
+# 2. Run application
+python main.py
+
+# 3. In the menu:
+#    - Select 1: Capture images for "Alice"
+#    - Select 1: Capture images for "Bob"
+#    - Select 2: Train model
+#    - Select 3: Run recognition
+#    - Press Q to stop
+#    - Select 5: Exit
+
+# Models are saved in models/ folder:
+ls models/
+# Output: lbph_model.xml  label_map.json
+```
+
+## Standalone Module Usage
+
+Each module can run independently:
+
+```bash
+python -m src.capture   # Capture faces only
+python -m src.train     # Train model only
+python -m src.predict   # Run recognition only
+```
+
+## Docker Deployment (Alternative)
+
+### Option 1: Quick Docker Run
 
 ```bash
 chmod +x docker-run.sh
 ./docker-run.sh
 ```
 
-### Using Docker Compose
+This script handles:
+- X11 forwarding for GUI
+- Camera device access
+- Volume mounting for persistent data
+
+### Option 2: Docker Compose
 
 ```bash
-# Start the application
+# Start
 xhost +local:docker
 docker-compose up
 
-# Stop the application
+# Stop
 docker-compose down
 xhost -local:docker
 ```
 
-### Manual Docker Commands
+### Option 3: Manual Docker
 
 ```bash
-# Build image
+# Build
 docker build -t face-recognition:latest .
 
-# Run container with camera and GUI access
+# Run
 docker run -it --rm \
     --device=/dev/video0:/dev/video0 \
     -e DISPLAY=$DISPLAY \
@@ -138,17 +248,87 @@ docker run -it --rm \
 ### Using Makefile
 
 ```bash
-make help           # Show all available commands
+make help           # Show all commands
 make setup          # Setup local environment
 make run            # Run locally
+make test           # Run tests
 make build          # Build Docker image
 make docker-run     # Run in Docker
 make clean          # Clean up
 ```
 
-## Requirements
+## Troubleshooting
 
-- Python 3.11+
-- Webcam/Camera device
-- X11 display server (for GUI on Linux)
-- Docker (optional, for containerized deployment)
+### Camera Not Detected
+
+```bash
+# Check camera device
+ls /dev/video*
+
+# Test camera access
+python -c "import cv2; print(cv2.VideoCapture(0).isOpened())"
+```
+
+### OpenCV GUI Not Showing (Docker)
+
+```bash
+# Allow X11 forwarding
+xhost +local:docker
+
+# Check DISPLAY variable
+echo $DISPLAY
+```
+
+### Import Errors
+
+```bash
+# Reinstall dependencies
+pip install --force-reinstall -r requirements.txt
+
+# Verify opencv-contrib
+python -c "import cv2; cv2.face.LBPHFaceRecognizer_create()"
+```
+
+### Low Recognition Accuracy
+
+- Capture more images per person (50-100 recommended)
+- Ensure good lighting conditions
+- Capture from different angles
+- Retrain the model after adding more images
+
+## Model Storage
+
+All trained models are saved in the `models/` directory:
+
+```
+models/
+├── lbph_model.xml      # Trained LBPH recognizer (OpenCV format)
+└── label_map.json      # Mapping of numeric labels to person names
+```
+
+**Example label_map.json:**
+```json
+{
+  "0": "Alice",
+  "1": "Bob",
+  "2": "Charlie"
+}
+```
+
+The model persists across runs and can be backed up or transferred to other systems.
+
+## Testing
+
+Run the test suite:
+
+```bash
+python tests/test_utils.py
+```
+
+## Technical Details
+
+- **Face Detection:** MediaPipe Face Mesh (468 landmarks)
+- **Recognition Algorithm:** LBPH (Local Binary Patterns Histograms)
+- **Image Format:** Grayscale JPEG
+- **Model Format:** OpenCV XML
+- **Confidence Score:** Lower values indicate better matches (typically < 50 for good matches)
