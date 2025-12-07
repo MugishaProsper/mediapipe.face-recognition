@@ -12,9 +12,6 @@ build/
 
 # Project specific
 dataset/
-models/
-*.xml
-*.json
 
 # IDE
 .vscode/
